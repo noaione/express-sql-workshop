@@ -171,6 +171,10 @@ app.use(express.static(publicPath));
 // bind API
 app.use("/api", apiRouter);
 
+app.get("/register", (req, res) => {
+    res.sendFile(path.join(publicPath, "register.html"));
+})
+
 // start server and before that connect to database
 const port = process.env.PORT || 3000;
 
