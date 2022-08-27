@@ -3,18 +3,18 @@
 This is a workshop project for using express.js and SQL (MySQL/SQLite)
 
 ## Backend Stack
-- TypeScript
-- express.js
-- SQLite with Prisma.io ORM
+- [TypeScript](https://www.typescriptlang.org/)
+- [express.js](https://expressjs.com/)
+- SQLite with [Prisma.io ORM](https://prisma.io/)
 
 ## Frontend Stack
 - ES6 JavaScript
-- Tailwind CSS
+- [Tailwind CSS](https://tailwindcss.com/)
 
 ## Running
 0. Install [yarn](https://yarnpkg.com/) if you have not.
 1. Clone this repository
-2. Run `yarn` to isntall all the packages
+2. Run `yarn` to install all the packages
 
 **For production build:**
 1. Run `yarn build` to build the transpiled js files
@@ -25,3 +25,10 @@ This is a workshop project for using express.js and SQL (MySQL/SQLite)
 1. Open another terminal
 2. In the first terminal, run `yarn watch` to start our web server
 3. In the second terminal, run `yarn watch:css` to watch changes to our files so tailwind will rebuilt the files
+
+
+## Acknowledgments
+Favicons are created using `key-outline` icons from [Material Design Icons](https://materialdesignicons.com/) and most of our icons are taken from [heroicons](https://heroicons.com/).
+
+## License
+This project is open sourced with [MIT License](LICENSE)
