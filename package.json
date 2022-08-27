@@ -6,7 +6,9 @@
   "scripts": {
     "start": "ts-node --transpile-only ./src/index.ts",
     "build": "tsc",
-    "watch": "ts-node-dev --respawn --transpile-only ./src/index.ts"
+    "build:css": "npx tailwindcss -i ./src/styles/tailwind.css -o ./public/static/css/styles.css",
+    "watch": "ts-node-dev --respawn --transpile-only ./src/index.ts",
+    "watch:css": "npx tailwindcss -i ./src/styles/tailwind.css -o ./public/static/css/styles.css --watch"
   },
   "dependencies": {
     "@prisma/client": "^4.2.1",
