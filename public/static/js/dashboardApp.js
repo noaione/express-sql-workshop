@@ -40,6 +40,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             modalError: false,
             modalDelete: false,
             modalAdd: false,
+            modalEdit: false,
         }
     }
     
@@ -172,7 +173,20 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         $buttonEdit.classList.add("bg-teal-400", "hover:bg-teal-500", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold", "select-none");
         $buttonEdit.innerText = "Edit";
         $buttonEdit.addEventListener("click", () => {
-            handlePasswordEdit(passwordId);
+            DashboardState.editing = passwordId;
+            document.getElementById("genPasswordValueEdit").value = password;
+            const $checkLower = document.querySelector(`#modalEdit input[name='genPassLower']`);
+            const $checkUpper = document.querySelector(`#modalEdit input[name='genPassUpper']`);
+            const $checkNum = document.querySelector(`#modalEdit input[name='genPassNum']`);
+            const $checkSym = document.querySelector(`#modalEdit input[name='genPassSym']`);
+            const $checkLength = document.querySelector(`#modalEdit input[name='genPassLength']`);
+            $checkLower.checked = hasAnyLowercase(password);
+            $checkUpper.checked = hasAnyUppercase(password);
+            $checkNum.checked = hasAnyNumber(password);
+            $checkSym.checked = hasAnySymbol(password);
+            $checkLength.value = password.length.toString();
+            document.getElementById("emailBoxEdit").value = email;
+            showModal("modalEdit");
         });
         $buttonEdit.setAttribute("data-password-id", passwordId.toString());
         $buttonEdit.setAttribute("data-button-type", "edit");
@@ -198,13 +212,41 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         return $tr;
     }
 
-    function isAllGenModifierOff() {
-        const $checkLower = document.querySelector("input[name='genPassLower']");
-        const $checkUpper = document.querySelector("input[name='genPassUpper']");
-        const $checkNum = document.querySelector("input[name='genPassNum']");
-        const $checkSym = document.querySelector("input[name='genPassSym']");
+    function isAllGenModifierOff(prefix) {
+        const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
+        const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
+        const $checkNum = document.querySelector(`#${prefix} input[name='genPassNum']`);
+        const $checkSym = document.querySelector(`#${prefix} input[name='genPassSym']`);
 
         return !$checkLower.checked && !$checkUpper.checked && !$checkNum.checked && !$checkSym.checked;
+    }
+
+    function enablePassModBtn(prefix) {
+        const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
+        const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
+        const $checkNum = document.querySelector(`#${prefix} input[name='genPassNum']`);
+        const $checkSym = document.querySelector(`#${prefix} input[name='genPassSym']`);
+        const $checkLength = document.querySelector(`#${prefix} input[name='genPassLength']`);
+
+        $checkLower.setAttribute("disabled", "true");
+        $checkUpper.setAttribute("disabled", "true");
+        $checkNum.setAttribute("disabled", "true");
+        $checkSym.setAttribute("disabled", "true");
+        $checkLength.setAttribute("disabled", "true");
+    }
+
+    function disablePassModBtn(prefix) {
+        const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
+        const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
+        const $checkNum = document.querySelector(`#${prefix} input[name='genPassNum']`);
+        const $checkSym = document.querySelector(`#${prefix} input[name='genPassSym']`);
+        const $checkLength = document.querySelector(`#${prefix} input[name='genPassLength']`);
+
+        $checkLower.removeAttribute("disabled");
+        $checkUpper.removeAttribute("disabled");
+        $checkNum.removeAttribute("disabled");
+        $checkSym.removeAttribute("disabled");
+        $checkLength.removeAttribute("disabled");
     }
 
     /**
@@ -234,10 +276,32 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         showModal("modalError");
     }
 
-    function cycleGeneratedPassword() {
-        const $btnRegenPass = document.getElementById("btnRegenPass");
-        const $checkLength = document.querySelector("input[name='genPassLength']");
-        const isAllOff = isAllGenModifierOff();
+    function hasAnyUppercase(str) {
+        return str.toLowerCase() !== str;
+    }
+
+    function hasAnyLowercase(str) {
+        return str.toUpperCase() !== str;
+    }
+
+    function hasAnyNumber(str) {
+        return /\d/.test(str);
+    }
+
+    function hasAnySymbol(str) {
+        return /[^a-zA-Z\d]/.test(str);
+    }
+
+    /**
+     * Regenerate password and put it in the modal
+     * @param {string} prefix the modal prefix thingamic
+     */
+    function cycleGeneratedPassword(prefix) {
+        const extraText = prefix.includes("Edit") ? "Edit" : "";
+        const $btnRegenPass = document.getElementById("btnRegenPass" + extraText);
+        const $checkLength = document.querySelector(`#${prefix} input[name='genPassLength']`);
+        console.info($checkLength, prefix);
+        const isAllOff = isAllGenModifierOff(prefix);
         if (isAllOff) {
             $btnRegenPass.setAttribute("disabled", "true");
             $checkLength.setAttribute("disabled", "true");
@@ -246,14 +310,19 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             $btnRegenPass.removeAttribute("disabled");
             $checkLength.removeAttribute("disabled");
         }
-        const $checkLower = document.querySelector("input[name='genPassLower']");
-        const $checkUpper = document.querySelector("input[name='genPassUpper']");
-        const $checkNum = document.querySelector("input[name='genPassNum']");
-        const $checkSym = document.querySelector("input[name='genPassSym']");
+        const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
+        const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
+        const $checkNum = document.querySelector(`#${prefix} input[name='genPassNum']`);
+        const $checkSym = document.querySelector(`#${prefix} input[name='genPassSym']`);
         const passLength = parseInt($checkLength.value) || 8;
         const password = generatePassword($checkLower.checked, $checkUpper.checked, $checkNum.checked, $checkSym.checked, passLength);
-        const $passValue = document.getElementById("genPasswordValue");
-        $passValue.innerText = password;
+        const $passValue = document.getElementById("genPasswordValue" + extraText);
+        // check if node type is <input>
+        if ($passValue.tagName === "INPUT") {
+            $passValue.value = password;
+        } else {
+            $passValue.innerText = password;
+        }
     }
 
     function main() {
@@ -301,30 +370,50 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         const $addPasswordBtn = document.getElementById("generateNewPass");
         $addPasswordBtn.addEventListener("click", (ev) => {
             ev.preventDefault();
-            cycleGeneratedPassword();
+            cycleGeneratedPassword("modalAdd");
             showModal("modalAdd");
         });
 
         const $btnRegenPass = document.getElementById("btnRegenPass");
         $btnRegenPass.addEventListener("click", (ev) => {
             ev.preventDefault();
-            cycleGeneratedPassword();
+            cycleGeneratedPassword("modalAdd");
         });
 
-        const $checkLower = document.querySelector("input[name='genPassLower']");
-        const $checkUpper = document.querySelector("input[name='genPassUpper']");
-        const $checkNum = document.querySelector("input[name='genPassNum']");
-        const $checkSym = document.querySelector("input[name='genPassSym']");
-        const $checkLength = document.querySelector("input[name='genPassLength']");
+        const $checkLower = document.querySelector("#modalAdd input[name='genPassLower']");
+        const $checkUpper = document.querySelector("#modalAdd input[name='genPassUpper']");
+        const $checkNum = document.querySelector("#modalAdd input[name='genPassNum']");
+        const $checkSym = document.querySelector("#modalAdd input[name='genPassSym']");
+        const $checkLength = document.querySelector("#modalAdd input[name='genPassLength']");
         const cyclePass = (ev) => {
             ev.preventDefault();
-            cycleGeneratedPassword();
+            cycleGeneratedPassword("modalAdd");
         }
         $checkLower.addEventListener("change", cyclePass);
         $checkUpper.addEventListener("change", cyclePass);
         $checkNum.addEventListener("change", cyclePass);
         $checkSym.addEventListener("change", cyclePass);
         $checkLength.addEventListener("change", cyclePass);
+
+        const $btnRegenPassEdit = document.getElementById("btnRegenPassEdit");
+        $btnRegenPassEdit.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            cycleGeneratedPassword("modalEdit");
+        });
+        const $checkLowerEd = document.querySelector("#modalEdit input[name='genPassLower']");
+        const $checkUpperEd = document.querySelector("#modalEdit input[name='genPassUpper']");
+        const $checkNumEd = document.querySelector("#modalEdit input[name='genPassNum']");
+        const $checkSymEd = document.querySelector("#modalEdit input[name='genPassSym']");
+        const $checkLengthEd = document.querySelector("#modalEdit input[name='genPassLength']");
+        const cyclePassEdit = (ev) => {
+            ev.preventDefault();
+            cycleGeneratedPassword("modalEdit");
+        }
+        $checkLowerEd.addEventListener("change", cyclePassEdit);
+        $checkUpperEd.addEventListener("change", cyclePassEdit);
+        $checkNumEd.addEventListener("change", cyclePassEdit);
+        $checkSymEd.addEventListener("change", cyclePassEdit);
+        $checkLengthEd.addEventListener("change", cyclePassEdit);
 
         const $addModal = document.getElementById("modalAdd");
         $addModal.onclick = (ev) => {
@@ -351,6 +440,10 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             }
 
             $modalAddBtn.setAttribute("disabled", "disabled");
+            $btnRegenPass.setAttribute("disabled", "disabled");
+            $email.setAttribute("disabled", "disabled");
+            $password.setAttribute("disabled", "disabled");
+            enablePassModBtn("modalAdd");
 
             SENDJson("POST", "/api/passwords", {
                 email: email,
@@ -358,6 +451,10 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             }).then((resp) => resp.json()).then((data) => {
                 DashboardState.modalLock.modalAdd = false;
                 $modalAddBtn.removeAttribute("disabled");
+                $btnRegenPass.removeAttribute("disabled");
+                $email.removeAttribute("disabled");
+                $password.removeAttribute("disabled");
+                disablePassModBtn("modalAdd");
                 if (data.success) {
                     const $tr = generateTableRow(data.data.id, email, innerPass);
                     $tableBody.appendChild($tr);
@@ -374,6 +471,66 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             if (!DashboardState.modalLock.modalAdd) {
                 hideModal("modalAdd");
             }
+        });
+
+        const $editModal = document.getElementById("modalEdit");
+        $editModal.onclick = (ev) => {
+            shouldCloseOrNot("modalEdit", ev);
+        }
+        const $modalEditBtnCancel = document.querySelector(".modal-edit-cancel-btn");
+        $modalEditBtnCancel.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            if (!DashboardState.modalLock.modalEdit) {
+                hideModal("modalEdit");
+            }
+        });
+        const $modalEditBtn = document.querySelector(".modal-edit-btn");
+        $modalEditBtn.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            DashboardState.modalLock.modalEdit = true;
+            const $email = document.getElementById("emailBoxEdit");
+            const $password = document.getElementById("genPasswordValueEdit");
+            const email = $email.value;
+            const innerPass = $password.value;
+
+            if (isEmpty(email)) {
+                alert("Email cannot be empty!");
+                DashboardState.modalLock.modalEdit = false;
+                return;
+            };
+            if (isEmpty(innerPass)) {
+                alert("Password cannot be empty!");
+                DashboardState.modalLock.modalEdit = false;
+                return;
+            }
+
+            $modalEditBtn.setAttribute("disabled", "disabled");
+            $email.setAttribute("disabled", "disabled");
+            $password.setAttribute("disabled", "disabled");
+            $btnRegenPassEdit.setAttribute("disabled", "disabled");
+            enablePassModBtn("modalEdit");
+
+            SENDJson("PUT", "/api/passwords", {
+                id: DashboardState.editing,
+                email: email,
+                password: innerPass
+            }).then((resp) => resp.json()).then((data) => {
+                DashboardState.modalLock.modalEdit = false;
+                $modalEditBtn.removeAttribute("disabled");
+                $btnRegenPassEdit.removeAttribute("disabled");
+                $email.removeAttribute("disabled");
+                $password.removeAttribute("disabled");
+                disablePassModBtn("modalEdit");
+                DashboardState.editing = null;
+                if (data.success) {
+                    const $tr = generateTableRow(data.data.id, email, innerPass);
+                    $tableBody.replaceChild($tr, document.querySelector(`tr[data-password-id="${data.data.id}"]`));
+                    hideModal("modalEdit");
+                } else {
+                    hideModal("modalEdit");
+                    displayError(data.error);
+                }
+            });
         });
 
         document.getElementById("logOutBtn").addEventListener("click", (ev) => {
