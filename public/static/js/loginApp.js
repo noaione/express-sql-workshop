@@ -87,8 +87,8 @@
 
 
     if (document.readyState === "complete") {
-        document.addEventListener("DOMContentLoaded", main);
-    } else {
         main();
+    } else {
+        document.addEventListener("DOMContentLoaded", main);
     }
 })();

@@ -389,8 +389,8 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
     }
     
     if (document.readyState === "complete") {
-        document.addEventListener("DOMContentLoaded", main);
-    } else {
         main();
+    } else {
+        document.addEventListener("DOMContentLoaded", main);
     }
 })();
