@@ -175,6 +175,15 @@ app.get("/register", (req, res) => {
     res.sendFile(path.join(publicPath, "register.html"));
 })
 
+app.get("/dashboard", (req, res) => {
+    // @ts-ignore
+    if (req.session && req.session.userId) {
+        res.sendFile(path.join(publicPath, "dashboard.html"));
+    } else {
+        res.redirect("/");
+    }
+})
+
 // start server and before that connect to database
 const port = process.env.PORT || 3000;
 
