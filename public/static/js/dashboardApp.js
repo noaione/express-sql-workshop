@@ -1,3 +1,33 @@
+/**
+ * Generate random password
+ * @param {boolean} capitalLetter Enable capital letter
+ * @param {boolean} number Enable number
+ * @param {boolean} symbol Enable symbol
+ * @param {number} length Password length
+ */
+function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8) {
+    const lowerCase = "abcdefghijklmnopqrstuvwxyz";
+    const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const symbols = "!@#$%^&*_-+=";
+
+    let password = "";
+    let characters = "";
+
+    if (lowerLetter) characters += lowerCase;
+    if (capitalLetter) characters += upperCase;
+    if (number) characters += numbers;
+    if (symbol) characters += symbols;
+
+    if (characters.length === 0) return "";
+
+    for (let i = 0; i < length; i++) {
+        password += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    return password;
+} // <-- the reason it is not in the below safeguard is because I want to test it from the browser console itself.
+
 // safeguard, make sure the js content and function cannot be acessed by the browser
 (function() {
     const DashboardState = {
@@ -31,7 +61,6 @@
         return str.replace(/\s/g, '').length < 1;
     }
     
-    
     function GETJson(url) {
         return fetch(url, {
             method: "GET",
@@ -40,7 +69,7 @@
             },
         }).then((resp) => resp.json());
     }
-    
+
     /**
      * Send data to an API
      * @param {"GET" | "POST" | "DELETE" | "PUT"} method HTTP Method
@@ -90,12 +119,8 @@
         const $tr = document.querySelector(`tr[data-password-id="${passwordId}"]`);
         const $btnDelete = $tr.querySelector("button[data-button-type='delete']");
         $btnDelete.setAttribute("disabled", "disabled");
-        $btnDelete.classList.remove("bg-red-400", "hover:bg-red-500");
-        $btnDelete.classList.add("bg-red-600", "cursor-not-allowed");
         console.info("[Delete]", passwordId);
         SENDJson("DELETE", "/api/passwords", {id: passwordId}).then((resp) => resp.json()).then((data) => {
-            $btnDelete.classList.remove("bg-red-600", "cursor-not-allowed");
-            $btnDelete.classList.add("bg-red-400", "hover:bg-red-500");
             $btnDelete.removeAttribute("disabled");
             DashboardState.deleted = null;
             if (data.success) {
@@ -153,7 +178,7 @@
         $buttonEdit.setAttribute("data-button-type", "edit");
     
         const $buttonDelete = document.createElement("button");
-        $buttonDelete.classList.add("bg-red-400", "hover:bg-red-500", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold", "select-none");
+        $buttonDelete.classList.add("bg-red-400", "hover:bg-red-500", "disabled:bg-red-500", "disabled:cursor-not-allowed", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold", "select-none");
         $buttonDelete.innerText = "Delete";
         $buttonDelete.addEventListener("click", () => {
             console.info("[Delete]", passwordId);
@@ -171,6 +196,15 @@
         $tr.appendChild($tdActions);
         $tr.setAttribute("data-password-id", passwordId.toString());
         return $tr;
+    }
+
+    function isAllGenModifierOff() {
+        const $checkLower = document.querySelector("input[name='genPassLower']");
+        const $checkUpper = document.querySelector("input[name='genPassUpper']");
+        const $checkNum = document.querySelector("input[name='genPassNum']");
+        const $checkSym = document.querySelector("input[name='genPassSym']");
+
+        return !$checkLower.checked && !$checkUpper.checked && !$checkNum.checked && !$checkSym.checked;
     }
 
     /**
@@ -199,7 +233,29 @@
         $modalErrorTextView.innerText = message;
         showModal("modalError");
     }
-    
+
+    function cycleGeneratedPassword() {
+        const $btnRegenPass = document.getElementById("btnRegenPass");
+        const $checkLength = document.querySelector("input[name='genPassLength']");
+        const isAllOff = isAllGenModifierOff();
+        if (isAllOff) {
+            $btnRegenPass.setAttribute("disabled", "true");
+            $checkLength.setAttribute("disabled", "true");
+            return;
+        } else {
+            $btnRegenPass.removeAttribute("disabled");
+            $checkLength.removeAttribute("disabled");
+        }
+        const $checkLower = document.querySelector("input[name='genPassLower']");
+        const $checkUpper = document.querySelector("input[name='genPassUpper']");
+        const $checkNum = document.querySelector("input[name='genPassNum']");
+        const $checkSym = document.querySelector("input[name='genPassSym']");
+        const passLength = parseInt($checkLength.value) || 8;
+        const password = generatePassword($checkLower.checked, $checkUpper.checked, $checkNum.checked, $checkSym.checked, passLength);
+        const $passValue = document.getElementById("genPasswordValue");
+        $passValue.innerText = password;
+    }
+
     function main() {
         // do main stuff here
         const $tableBody = document.getElementById("passwordView");
@@ -245,8 +301,30 @@
         const $addPasswordBtn = document.getElementById("generateNewPass");
         $addPasswordBtn.addEventListener("click", (ev) => {
             ev.preventDefault();
+            cycleGeneratedPassword();
             showModal("modalAdd");
         });
+
+        const $btnRegenPass = document.getElementById("btnRegenPass");
+        $btnRegenPass.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            cycleGeneratedPassword();
+        });
+
+        const $checkLower = document.querySelector("input[name='genPassLower']");
+        const $checkUpper = document.querySelector("input[name='genPassUpper']");
+        const $checkNum = document.querySelector("input[name='genPassNum']");
+        const $checkSym = document.querySelector("input[name='genPassSym']");
+        const $checkLength = document.querySelector("input[name='genPassLength']");
+        const cyclePass = (ev) => {
+            ev.preventDefault();
+            cycleGeneratedPassword();
+        }
+        $checkLower.addEventListener("change", cyclePass);
+        $checkUpper.addEventListener("change", cyclePass);
+        $checkNum.addEventListener("change", cyclePass);
+        $checkSym.addEventListener("change", cyclePass);
+        $checkLength.addEventListener("change", cyclePass);
 
         const $addModal = document.getElementById("modalAdd");
         $addModal.onclick = (ev) => {
@@ -256,12 +334,43 @@
         $modalAddBtn.addEventListener("click", (ev) => {
             ev.preventDefault();
             DashboardState.modalLock.modalAdd = true;
-            console.info("Adding new shit");
+            const $email = document.getElementById("emailBoxAdd");
+            const $password = document.getElementById("genPasswordValue");
+            const email = $email.value;
+            const innerPass = $password.innerText;
+
+            if (isEmpty(email)) {
+                alert("Email cannot be empty!");
+                DashboardState.modalLock.modalAdd = false;
+                return;
+            };
+            if (isEmpty(innerPass)) {
+                alert("Password cannot be empty!");
+                DashboardState.modalLock.modalAdd = false;
+                return;
+            }
+
+            $modalAddBtn.setAttribute("disabled", "disabled");
+
+            SENDJson("POST", "/api/passwords", {
+                email: email,
+                password: innerPass
+            }).then((resp) => resp.json()).then((data) => {
+                DashboardState.modalLock.modalAdd = false;
+                $modalAddBtn.removeAttribute("disabled");
+                if (data.success) {
+                    const $tr = generateTableRow(data.data.id, email, innerPass);
+                    $tableBody.appendChild($tr);
+                    hideModal("modalAdd");
+                } else {
+                    hideModal("modalAdd");
+                    displayError(data.error);
+                }
+            });
         });
         const $modalAddBtnCancel = document.querySelector(".modal-add-cancel-btn");
         $modalAddBtnCancel.addEventListener("click", (ev) => {
             ev.preventDefault();
-            console.info(DashboardState);
             if (!DashboardState.modalLock.modalAdd) {
                 hideModal("modalAdd");
             }
