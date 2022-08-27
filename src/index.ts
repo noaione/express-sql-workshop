@@ -66,7 +66,7 @@ apiRouter.post("/signup", async (req, res) => {
     }
 })
 
-apiRouter.get("/logout", (req, res) => {
+apiRouter.post("/logout", (req, res) => {
     req.session!.destroy(err => {
         if (err) {
             wrapJSON(res.status(500), undefined, "Error", 500);
