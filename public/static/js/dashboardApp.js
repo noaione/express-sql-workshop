@@ -5,6 +5,12 @@
         deleted: null,
         /** @type {string | null} */
         editing: null,
+        // allow us to lock the modal so it cannot be closed.
+        modalLock: {
+            modalError: false,
+            modalDelete: false,
+            modalAdd: false,
+        }
     }
     
     /**
@@ -35,14 +41,24 @@
         }).then((resp) => resp.json());
     }
     
-    function SENDJson(method, url, data) {
-        return fetch(url, {
+    /**
+     * Send data to an API
+     * @param {"GET" | "POST" | "DELETE" | "PUT"} method HTTP Method
+     * @param {string} url The URL to send data to
+     * @param {any | null} data The data to be sent
+     * @returns 
+     */
+    function SENDJson(method, url, data = null) {
+        const fetchStats = {
             method: method,
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
-        })
+        }
+        if (!isNone(data)) {
+            fetchStats.body = JSON.stringify(data);
+        }
+        return fetch(url, fetchStats);
     }
     
     /* <tr class="border-b-[1px] border-gray-500">
@@ -118,7 +134,7 @@
         $tdPassword.classList.add("p-2", "text-center");
     
         const $innerPassword = document.createElement("span");
-        $innerPassword.classList.add("blur-md", "hover:blur-none", "transition", );
+        $innerPassword.classList.add("blur-md", "hover:blur-none", "transition", "select-all");
         $innerPassword.innerText = password;
         $tdPassword.appendChild($innerPassword);
     
@@ -128,7 +144,7 @@
         $divActionsInner.classList.add("flex", "flex-col", "justify-center", "gap-2");
     
         const $buttonEdit = document.createElement("button");
-        $buttonEdit.classList.add("bg-teal-400", "hover:bg-teal-500", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold");
+        $buttonEdit.classList.add("bg-teal-400", "hover:bg-teal-500", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold", "select-none");
         $buttonEdit.innerText = "Edit";
         $buttonEdit.addEventListener("click", () => {
             handlePasswordEdit(passwordId);
@@ -137,7 +153,7 @@
         $buttonEdit.setAttribute("data-button-type", "edit");
     
         const $buttonDelete = document.createElement("button");
-        $buttonDelete.classList.add("bg-red-400", "hover:bg-red-500", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold");
+        $buttonDelete.classList.add("bg-red-400", "hover:bg-red-500", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold", "select-none");
         $buttonDelete.innerText = "Delete";
         $buttonDelete.addEventListener("click", () => {
             console.info("[Delete]", passwordId);
@@ -156,13 +172,16 @@
         $tr.setAttribute("data-password-id", passwordId.toString());
         return $tr;
     }
-    
+
     /**
-     * 
+     * Should we close our modal or not!
      * @param {string} modalId Modal ID
      * @param {PointerEvent} ev Event
      */
     function shouldCloseOrNot(modalId, ev) {
+        if (DashboardState.modalLock[modalId]) {
+            return;
+        }
         let shouldCloseModal = true;
         ev.composedPath().forEach((el) => {
             const modalView = modalId + "View";
@@ -174,7 +193,7 @@
             hideModal(modalId);
         }
     }
-    
+
     function displayError(message) {
         const $modalErrorTextView = document.getElementById("modalErrorTextView");
         $modalErrorTextView.innerText = message;
@@ -221,6 +240,42 @@
         $modalErrorBtn.addEventListener("click", (ev) => {
             ev.preventDefault();
             hideModal("modalError");
+        });
+
+        const $addPasswordBtn = document.getElementById("generateNewPass");
+        $addPasswordBtn.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            showModal("modalAdd");
+        });
+
+        const $addModal = document.getElementById("modalAdd");
+        $addModal.onclick = (ev) => {
+            shouldCloseOrNot("modalAdd", ev);
+        }
+        const $modalAddBtn = document.querySelector(".modal-add-btn");
+        $modalAddBtn.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            DashboardState.modalLock.modalAdd = true;
+            console.info("Adding new shit");
+        });
+        const $modalAddBtnCancel = document.querySelector(".modal-add-cancel-btn");
+        $modalAddBtnCancel.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            console.info(DashboardState);
+            if (!DashboardState.modalLock.modalAdd) {
+                hideModal("modalAdd");
+            }
+        });
+
+        document.getElementById("logOutBtn").addEventListener("click", (ev) => {
+            ev.preventDefault();
+            SENDJson("POST", "/api/logout").then((resp) => resp.json()).then((d) => {
+                if (d.success) {
+                    window.location.href = "/";
+                } else {
+                    displayError("Unable to log out from server!");
+                }
+            })
         });
     }
     
