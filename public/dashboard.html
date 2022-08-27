@@ -13,8 +13,20 @@
             </svg>
             <div class="flex flex-col">
                 <h1 class="mt-4 text-2xl font-semibold">Password Manager</h1>
-            </div>            
+            </div>
         </div>
-        <!-- <script src="/static/js/loginApp.js"></script> -->
+        <div class="flex flex-col px-4">
+            <table class="table-auto">
+                <thead>
+                    <tr class="border-b-[1px] border-gray-500">
+                        <th class="p-4">Email</th>
+                        <th class="p-4">Password</th>
+                        <th class="p-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="passwordView" class="break-words"></tbody>
+            </table>
+        </div>
+        <script src="/static/js/dashboardApp.js"></script>
     </body>
 </html>
