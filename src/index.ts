@@ -12,7 +12,7 @@ import { wrapJSON } from "./utils";
 const prisma = new PrismaClient();
 const app = express();
 
-// current file dir
+// Public file directory
 const publicPath = path.join(__dirname, "..", "public");
 
 /**
