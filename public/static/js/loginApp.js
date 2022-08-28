@@ -32,6 +32,12 @@
         }
     }
 
+    /**
+     * Send data to an API
+     * @param {string} url The URL to send data to
+     * @param {any | null} data The data to be sent
+     * @returns 
+     */
     function POSTJson(url, data) {
         return fetch(url, {
             method: "POST",
@@ -42,19 +48,21 @@
         })
     }
 
+    // Our main function
     function main() {
-        // loginForm
         const $emailBox = document.getElementById('emailBox');
         const $passwordBox = document.getElementById('passBox');
         const loginForm = document.getElementById('loginForm');
         logError(null);
+        // Override our form submit event
         loginForm.addEventListener("submit", (ev) => {
+            // Prevent the default behaviour
             ev.preventDefault();
             console.info("[Login] Submitting to API...");
 
             const email = $emailBox.value;
             const password = $passwordBox.value;
-            console.info(isEmpty(email), isEmpty(password));
+            // Check if both fields are filled in
             if (isEmpty(email)) {
                 logError("Email form is empty!");
                 return;
@@ -69,8 +77,9 @@
                 password
             }
 
-            // use modern fetch
+            // Send the data to our backend, use POST method to /api/login
             POSTJson("/api/login", jsonData).then((res) => res.json()).then((data) => {
+                // If success, redirect to dashboard
                 if (data.success) {
                     console.info("[Login] Success!");
                     window.location.href = "/dashboard";
@@ -85,7 +94,9 @@
         })
     }
 
-
+    /**
+     * Check if our document is ready, if not wait until ready and call our main function
+     */
     if (document.readyState === "complete") {
         main();
     } else {

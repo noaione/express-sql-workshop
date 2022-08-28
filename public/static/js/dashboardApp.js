@@ -1,5 +1,6 @@
 /**
  * Generate random password
+ * @param {boolean} lowerLetter Enable lowercased letter
  * @param {boolean} capitalLetter Enable capital letter
  * @param {boolean} number Enable number
  * @param {boolean} symbol Enable symbol
@@ -14,13 +15,16 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
     let password = "";
     let characters = "";
 
+    // append to our character list if enabled
     if (lowerLetter) characters += lowerCase;
     if (capitalLetter) characters += upperCase;
     if (number) characters += numbers;
     if (symbol) characters += symbols;
 
+    // check if our character list is empty, if yes just return nothing as fallback.
     if (characters.length === 0) return "";
 
+    // lets generate random password according to our length
     for (let i = 0; i < length; i++) {
         password += characters.charAt(Math.floor(Math.random() * characters.length));
     }
@@ -30,6 +34,10 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
 
 // safeguard, make sure the js content and function cannot be acessed by the browser
 (function() {
+    /**
+     * Our custom state object, simulating React state object.
+     * This state basically holds the data that we will use to share between functions.
+     */
     const DashboardState = {
         /** @type {number | null} */
         deleted: null,
@@ -43,7 +51,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             modalEdit: false,
         }
     }
-    
+
     /**
      * Check if value is undefined or null
      * @param {any} value 
@@ -52,7 +60,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
      function isNone(value) {
         return value === undefined || value === null;
     }
-    
+
     /**
      * Check if string is empty
      * @param {string} str 
@@ -61,7 +69,12 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         if (isNone(str)) return true;
         return str.replace(/\s/g, '').length < 1;
     }
-    
+
+    /**
+     * Fetch data from our backend server in JSON format
+     * @param {url} url The URL to be fetched from
+     * @returns Fetched data, in Promise format
+     */
     function GETJson(url) {
         return fetch(url, {
             method: "GET",
@@ -90,18 +103,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         }
         return fetch(url, fetchStats);
     }
-    
-    /* <tr class="border-b-[1px] border-gray-500">
-    <td class="text-center p-2">sample@mail.com</td>
-    <td class="p-2 blur-md hover:blur-none transition text-center">samplepassword</td>
-    <td class="p-2 py-4">
-        <div class="flex flex-col justify-center gap-2">
-            <button class="bg-teal-400 hover:bg-teal-500 transition mx-auto px-4 py-1 rounded-md text-sm uppercase font-semibold">Edit</button>
-            <button class="bg-red-400 hover:bg-red-500 transition mx-auto px-4 py-1 rounded-md text-sm uppercase font-semibold">Delete</button>
-        </div>
-    </td>
-    </tr> */
-    
+
     /**
      * Handle password editing
      * @param {number} passwordId the password id
@@ -110,17 +112,17 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         // do stuff here
         console.info("[Edit]", passwordId);
     }
-    
+
     /**
      * Handle password deletion
      * @param {number} passwordId the password id
      */
      function handlePasswordDelete(passwordId) {
-        // do stuff here
         const $tr = document.querySelector(`tr[data-password-id="${passwordId}"]`);
         const $btnDelete = $tr.querySelector("button[data-button-type='delete']");
         $btnDelete.setAttribute("disabled", "disabled");
         console.info("[Delete]", passwordId);
+        // Send deletion request to the backend server
         SENDJson("DELETE", "/api/passwords", {id: passwordId}).then((resp) => resp.json()).then((data) => {
             $btnDelete.removeAttribute("disabled");
             DashboardState.deleted = null;
@@ -131,17 +133,25 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             }
         })
     }
-    
+
+    /**
+     * Show specific modal to the user
+     * @param {string} modalId Modal ID to be displayed
+     */
     function showModal(modalId) {
         const $modal = document.getElementById(modalId);
         $modal.classList.remove("hidden");
     }
-    
+
+    /**
+     * Hide/close specific modal to the user
+     * @param {string} modalId Modal ID to be closed
+     */
     function hideModal(modalId) {
         const $modal = document.getElementById(modalId);
         $modal.classList.add("hidden");
     }
-    
+
     /**
      * Generate a table row for our password list!
      * @param {number} passwordId Password ID
@@ -149,36 +159,50 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
      * @param {string} password plaintext password
      */
     function generateTableRow(passwordId, email, password) {
+        // Create our base <tr> element
         const $tr = document.createElement("tr");
         $tr.classList.add("border-b-[1px]", "border-gray-500");
-    
+
+        // Create our email element
         const $tdEmail = document.createElement("td");
         $tdEmail.classList.add("text-center", "p-2");
         $tdEmail.innerText = email;
-    
+
+        // Create our password element
         const $tdPassword = document.createElement("td");
         $tdPassword.classList.add("p-2", "text-center");
-    
+
+        // Create our inner password, so it only select the password itself instead of the whole div object
         const $innerPassword = document.createElement("span");
         $innerPassword.classList.add("blur-md", "hover:blur-none", "transition", "select-all");
         $innerPassword.innerText = password;
         $tdPassword.appendChild($innerPassword);
-    
+
+        // Create our actions element wrapper
         const $tdActions = document.createElement("td");
         $tdActions.classList.add("p-2", "py-4");
         const $divActionsInner = document.createElement("div");
         $divActionsInner.classList.add("flex", "flex-col", "justify-center", "gap-2");
-    
+
+        // Create our edit button
         const $buttonEdit = document.createElement("button");
         $buttonEdit.classList.add("bg-teal-400", "hover:bg-teal-500", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold", "select-none");
         $buttonEdit.innerText = "Edit";
         $buttonEdit.addEventListener("click", () => {
+            // Add our edit button event handler here
+            // First we add the password ID to our editing state (simulating React)
             DashboardState.editing = passwordId;
             document.getElementById("genPasswordValueEdit").value = password;
+            // Now, let's check our old password
+            // See if it contains lowercase letters
             const $checkLower = document.querySelector(`#modalEdit input[name='genPassLower']`);
+            // See if it contains uppercase letters
             const $checkUpper = document.querySelector(`#modalEdit input[name='genPassUpper']`);
+            // See if it contains any numbers
             const $checkNum = document.querySelector(`#modalEdit input[name='genPassNum']`);
+            // See if it contains any symbols
             const $checkSym = document.querySelector(`#modalEdit input[name='genPassSym']`);
+            // Check our password length
             const $checkLength = document.querySelector(`#modalEdit input[name='genPassLength']`);
             $checkLower.checked = hasAnyLowercase(password);
             $checkUpper.checked = hasAnyUppercase(password);
@@ -186,32 +210,44 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             $checkSym.checked = hasAnySymbol(password);
             $checkLength.value = password.length.toString();
             document.getElementById("emailBoxEdit").value = email;
+            // After checking, now show the modal
             showModal("modalEdit");
         });
+        // Add custom attribute as helper when we will use querySelector to replace element or delete it
         $buttonEdit.setAttribute("data-password-id", passwordId.toString());
         $buttonEdit.setAttribute("data-button-type", "edit");
-    
+
+        // Create our delete button
         const $buttonDelete = document.createElement("button");
         $buttonDelete.classList.add("bg-red-400", "hover:bg-red-500", "disabled:bg-red-500", "disabled:cursor-not-allowed", "transition", "mx-auto", "px-4", "py-1", "rounded-md", "text-sm", "uppercase", "font-semibold", "select-none");
         $buttonDelete.innerText = "Delete";
         $buttonDelete.addEventListener("click", () => {
-            console.info("[Delete]", passwordId);
+            // Handle our deletion, first set the state like the edit button and show the modal
             DashboardState.deleted = passwordId;
             showModal("modalDelete");
         });
+        // Add custom attribute as helper when we will use querySelector to replace element or delete it
         $buttonDelete.setAttribute("data-password-id", passwordId.toString());
         $buttonDelete.setAttribute("data-button-type", "delete");
-    
+
+        // Add all of them to our base wrapper
         $divActionsInner.appendChild($buttonEdit);
         $divActionsInner.appendChild($buttonDelete);
         $tdActions.appendChild($divActionsInner);
         $tr.appendChild($tdEmail);
         $tr.appendChild($tdPassword);
         $tr.appendChild($tdActions);
+        // Set password-id to our element
         $tr.setAttribute("data-password-id", passwordId.toString());
+        // Return the result
         return $tr;
     }
 
+    /**
+     * Check if all of our password generator modifier is unchecked
+     * @param {"modalAdd" | "modalEdit"} prefix the modal we're editing
+     * @returns {boolean} true if all modifier is unchecked, false otherwise
+     */
     function isAllGenModifierOff(prefix) {
         const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
         const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
@@ -221,6 +257,10 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         return !$checkLower.checked && !$checkUpper.checked && !$checkNum.checked && !$checkSym.checked;
     }
 
+    /**
+     * Disable our modifier button so user cannot check/uncheck them
+     * @param {"modalAdd" | "modalEdit"} prefix the modal we're editing
+     */
     function enablePassModBtn(prefix) {
         const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
         const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
@@ -235,6 +275,10 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         $checkLength.setAttribute("disabled", "true");
     }
 
+    /**
+     * Enable our modifier button so user cannot check/uncheck them
+     * @param {"modalAdd" | "modalEdit"} prefix the modal we're editing
+     */
     function disablePassModBtn(prefix) {
         const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
         const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
@@ -270,38 +314,69 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         }
     }
 
+    /**
+     * Display error message to the user using the modal
+     * @param {string} message Error message to be displayed
+     */
     function displayError(message) {
         const $modalErrorTextView = document.getElementById("modalErrorTextView");
         $modalErrorTextView.innerText = message;
         showModal("modalError");
     }
 
+    /**
+     * Check if our password contain any lowercase letter or not
+     * @param {string} str String to be checked
+     * @returns {boolean} true if contain lowercase letter, false otherwise
+     */
     function hasAnyUppercase(str) {
+        // Check by lowercasing everything and see if it's the same
+        // If yes, that means that all are lowercase and no uppercase
         return str.toLowerCase() !== str;
     }
 
+    /**
+     * Check if our password contain any uppercase letter or not
+     * @param {string} str String to be checked
+     * @returns {boolean} true if contain uppercase letter, false otherwise
+     */
     function hasAnyLowercase(str) {
+        // Check by uppercase everything and see if it's the same
+        // If yes, that means that all are uppercase and no lowercase
         return str.toUpperCase() !== str;
     }
 
+    /**
+     * Check if our password contain any numbers or not
+     * @param {string} str String to be checked
+     * @returns {boolean} true if contain numbers, false otherwise
+     */
     function hasAnyNumber(str) {
+        // Use regex to check if we have any number
         return /\d/.test(str);
     }
 
+    /**
+     * Check if our password contain any symbols or not
+     * @param {string} str String to be checked
+     * @returns {boolean} true if contain symbols, false otherwise
+     */
     function hasAnySymbol(str) {
+        // Regex, basically invert checking anything outside capital, lowercase, and numbers
         return /[^a-zA-Z\d]/.test(str);
     }
 
     /**
      * Regenerate password and put it in the modal
-     * @param {string} prefix the modal prefix thingamic
+     * @param {"modalAdd" | "modalEdit"} prefix the modal we're editing
      */
     function cycleGeneratedPassword(prefix) {
+        // Check prefix first
         const extraText = prefix.includes("Edit") ? "Edit" : "";
         const $btnRegenPass = document.getElementById("btnRegenPass" + extraText);
         const $checkLength = document.querySelector(`#${prefix} input[name='genPassLength']`);
-        console.info($checkLength, prefix);
         const isAllOff = isAllGenModifierOff(prefix);
+        // Check the modifier, if all off disable everything and return.
         if (isAllOff) {
             $btnRegenPass.setAttribute("disabled", "true");
             $checkLength.setAttribute("disabled", "true");
@@ -310,6 +385,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             $btnRegenPass.removeAttribute("disabled");
             $checkLength.removeAttribute("disabled");
         }
+        // Check our modifier, and length to generate password
         const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
         const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
         const $checkNum = document.querySelector(`#${prefix} input[name='genPassNum']`);
@@ -325,9 +401,10 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         }
     }
 
+    // Our main function
     function main() {
-        // do main stuff here
         const $tableBody = document.getElementById("passwordView");
+        // Get our password list from the API, then append to our table
         GETJson("/api/passwords").then((data) => {
             data.data.forEach((pwd) => {
                 const $tr = generateTableRow(pwd.id, pwd.email, pwd.password);
@@ -335,7 +412,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             })
         })
     
-        // modal
+        // Add event listener to our modal
         const $deleteModal = document.getElementById("modalDelete");
         $deleteModal.onclick = (ev) => {
             shouldCloseOrNot("modalDelete", ev);
@@ -356,7 +433,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             ev.preventDefault();
             hideModal("modalDelete");
         });
-    
+
         const $errorModal = document.getElementById("modalError");
         $errorModal.onclick = (ev) => {
             shouldCloseOrNot("modalError", ev);
@@ -544,7 +621,10 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             })
         });
     }
-    
+
+    /**
+     * Check if our document is ready, if not wait until ready and call our main function
+     */
     if (document.readyState === "complete") {
         main();
     } else {
