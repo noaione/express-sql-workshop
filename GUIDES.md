@@ -1,5 +1,17 @@
 # Kidocode Workshop — express.js with SQL database
 
+**Table of Contents**
+- [QoL Extension for VSCode](#qol-extension-for-vscode)
+- [Backend Section](#backend-section)
+  - [TypeScript](#typescript)
+  - [Prisma ORM (Database)](#prisma-orm-database)
+  - [Source Code](#source-code)
+    - [`src/utils.ts`](#srcutilsts)
+    - [`src/types.ts`](#srctypests)
+    - [`src/index.ts`](#srcindexts)
+- [Frontend Section](#frontend-section)
+- [Package Explanation](#package-explanation)
+
 ### QoL Extension for VSCode
 - [JavaScript and TypeScript Nightly](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-next)
 - [Prisma](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
