@@ -22,11 +22,11 @@
 1. Prepare `yarn` if you haven’t (yarn is a package manager for nodejs)
 2. Create a new folder with the name `simple-passwd-manager` or anything you want
 3. Open terminal in that folder and type: `yarn init`
-    a. The above command will initialize your project, follow it properly
+   - The above command will initialize your project, follow it properly
 4. Now, let’s install some of our development tools and packages (go to [#package explanation](#package-explanation) for explanation of our packages)
-  	a. express.js: `yarn add express express-session` (`express-session` to manage our login session)
-    b. TypeScript: `yarn add --dev typescript ts-node ts-node-dev @types/node @types/express @types/express-session`
-    c. Prisma: `yarn add --dev prisma` and `yarn add @prisma/client`
+   - **express.js**: `yarn add express express-session` (`express-session` to manage our login session)
+   - **TypeScript**: `yarn add --dev typescript ts-node ts-node-dev @types/node @types/express @types/express-session`
+   - **Prisma**: `yarn add --dev prisma` and `yarn add @prisma/client`
 5. Create the following folder: `public`, `prisma`, and `src`
 
 ### TypeScript
