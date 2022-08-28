@@ -405,12 +405,19 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
     function main() {
         const $tableBody = document.getElementById("passwordView");
         // Get our password list from the API, then append to our table
-        GETJson("/api/passwords").then((data) => {
-            data.data.forEach((pwd) => {
-                const $tr = generateTableRow(pwd.id, pwd.email, pwd.password);
-                $tableBody.appendChild($tr);
-            })
-        })
+        GETJson("/api/passwords")
+            .then(
+                (data) => {
+                /**
+                 * @type {import ("../../../src/types").IPassword[]}
+                 */
+                const results = data.data;
+                results.forEach((pwd) => {
+                    const $tr = generateTableRow(pwd.id, pwd.email, pwd.password);
+                    $tableBody.appendChild($tr);
+                })
+            }
+        )
     
         // Add event listener to our modal
         const $deleteModal = document.getElementById("modalDelete");

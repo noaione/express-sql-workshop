@@ -2,25 +2,40 @@ import { PrismaClient } from "@prisma/client";
 import express from "express";
 import session from "express-session";
 import path from "path";
+import { IPassword } from "./types";
 
 import { wrapJSON } from "./utils";
 
+/**
+ * Initialize our database and express server
+ */
 const prisma = new PrismaClient();
 const app = express();
 
 // current file dir
 const publicPath = path.join(__dirname, "..", "public");
 
+/**
+ * Use JSON to process our body input
+ */
 app.use(express.json());
+/**
+ * Configure our express-session
+ */
 const sessConf: session.SessionOptions = {
+    // Randomized secret, generated with `openssl rand -hex 32`
     secret: "d1e6fc64bb0afcc76938f3f0562ea888cec64c40e384110dbdfe3b677752abfd",
+    saveUninitialized: false,
+    resave: false,
     cookie: {},
 }
 
+// If the app is running in production mode, enable trust proxy and secure cookies
 if (app.get("env") === "production") {
     app.set("trust proxy", 1);
     sessConf.cookie!.secure = true;
 }
+// Bind our session
 app.use(session(sessConf));
 
 // API routes
@@ -33,11 +48,16 @@ apiRouter.post("/login", async (req, res) => {
             email,
         },
     });
-    if (user && user.password === password) {
-        // @ts-ignore
-        req.session!.userId = user.id;
-        req.session.save()
-        wrapJSON(res, undefined, "Success", 200);
+    if (user) {
+        // Check password
+        if (user.password === password) {
+            // @ts-ignore
+            req.session!.userId = user.id;
+            req.session.save()
+            wrapJSON(res, undefined, "Success", 200);
+        } else {
+            wrapJSON(res.status(401), undefined, "Invalid Password", 401);
+        }
     } else {
         wrapJSON(res.status(401), undefined, "Invalid credentials", 401);
     }
@@ -45,6 +65,7 @@ apiRouter.post("/login", async (req, res) => {
 
 apiRouter.post("/signup", async (req, res) => {
     const {email, password} = req.body;
+    // Check email if it's been used!
     const user = await prisma.user.findUnique({
         where: {
             email,
@@ -67,6 +88,7 @@ apiRouter.post("/signup", async (req, res) => {
 })
 
 apiRouter.post("/logout", (req, res) => {
+    // Destory our session
     req.session!.destroy(err => {
         if (err) {
             wrapJSON(res.status(500), undefined, "Error", 500);
@@ -83,12 +105,14 @@ apiRouter.get("/passwords", async (req, res) => {
     if (!userId) {
         wrapJSON(res.status(403), undefined, "Unathorized", 403);
     } else {
+        // Get all passwords related to our user id
         const passwords = await prisma.passwordBank.findMany({
             where: {
                 userId,
             }
         })
-        const remappedPassword = passwords.map((passwd) => {
+        // Remap our password results
+        const remappedPassword: IPassword[] = passwords.map((passwd) => {
             return {
                 id: passwd.id,
                 email: passwd.email,
@@ -119,7 +143,7 @@ apiRouter.post("/passwords", async (req, res) => {
             email: newPasswd.email,
             password: newPasswd.password,
             lastUpdated: newPasswd.lastUpdated.toISOString(),
-        }, undefined, 200);
+        } as IPassword, undefined, 200);
     }
 })
 
@@ -145,7 +169,7 @@ apiRouter.put("/passwords", async (req, res) => {
             email: updatedPasswd.email,
             password: updatedPasswd.password,
             lastUpdated: updatedPasswd.lastUpdated.toISOString(),
-        }, undefined, 200);
+        } as IPassword, undefined, 200);
     }
 })
 
@@ -166,16 +190,19 @@ apiRouter.delete("/passwords", async (req, res) => {
 })
 
 
-// static serve
+// Bind our static folder using express.static so it got served automatically
 app.use(express.static(publicPath));
-// bind API
+// bind our API router
 app.use("/api", apiRouter);
 
+// Add custom register route
 app.get("/register", (req, res) => {
     res.sendFile(path.join(publicPath, "register.html"));
 })
 
+// Add our dashboard route
 app.get("/dashboard", (req, res) => {
+    // Check if the user is logged in
     // @ts-ignore
     if (req.session && req.session.userId) {
         res.sendFile(path.join(publicPath, "dashboard.html"));
@@ -187,6 +214,10 @@ app.get("/dashboard", (req, res) => {
 // start server and before that connect to database
 const port = process.env.PORT || 3000;
 
+/**
+ * Connect to our database, after it got established
+ * we will then start our server
+ */
 prisma.$connect().then(() => {
     app.listen(port, () => {
         console.log(`Starting server on http://localhost:${port}`)
@@ -196,6 +227,7 @@ prisma.$connect().then(() => {
     process.exit(1);
 })
 
+// Function to stop our server
 function shutdownServer() {
     prisma.$disconnect().then(() => {
         process.exit(0);
@@ -205,6 +237,9 @@ function shutdownServer() {
     });
 }
 
+/**
+ * Bind some exit code that we need to listen
+ */
 const processCallback = ["SIGINT", "SIGTERM", "SIGQUIT", "SIGHUP"];
 processCallback.forEach((signal) => {
     process.on(signal, () => {
