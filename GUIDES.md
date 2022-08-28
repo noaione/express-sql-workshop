@@ -144,7 +144,7 @@ export function isNone(value: any): value is Undefined {
 
 The above typing basically tells our TS compiler properly.
 
-**After that, let's create `wrapJSON` function which will make our JSON response consistent.
+**After that, let's create `wrapJSON` function which will make our JSON response consistent.**
 
 ```ts
 /**
