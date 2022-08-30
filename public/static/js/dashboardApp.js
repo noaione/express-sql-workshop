@@ -147,15 +147,6 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
     }
 
     /**
-     * Handle password editing
-     * @param {number} passwordId the password id
-     */
-    function handlePasswordEdit(passwordId) {
-        // do stuff here
-        console.info("[Edit]", passwordId);
-    }
-
-    /**
      * Handle password deletion
      * @param {number} passwordId the password id
      */
