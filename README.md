@@ -26,6 +26,7 @@ This is a workshop project for using express.js and SQL (MySQL/SQLite)
 2. In the first terminal, run `yarn watch` to start our web server
 3. In the second terminal, run `yarn watch:css` to watch changes to our files so tailwind will rebuilt the files
 
+You can also see our [GUIDES](GUIDES.md) to see how this project is created.
 
 ## Acknowledgments
 Favicons are created using `key-outline` icons from [Material Design Icons](https://materialdesignicons.com/) and most of our icons are taken from [heroicons](https://heroicons.com/).
