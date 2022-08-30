@@ -303,7 +303,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
      * Disable our modifier button so user cannot check/uncheck them
      * @param {"modalAdd" | "modalEdit"} prefix the modal we're editing
      */
-    function enablePassModBtn(prefix) {
+    function disablePasswordModifierCheckbox(prefix) {
         const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
         const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
         const $checkNum = document.querySelector(`#${prefix} input[name='genPassNum']`);
@@ -321,7 +321,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
      * Enable our modifier button so user cannot check/uncheck them
      * @param {"modalAdd" | "modalEdit"} prefix the modal we're editing
      */
-    function disablePassModBtn(prefix) {
+    function enablePasswordModifierCheckbox(prefix) {
         const $checkLower = document.querySelector(`#${prefix} input[name='genPassLower']`);
         const $checkUpper = document.querySelector(`#${prefix} input[name='genPassUpper']`);
         const $checkNum = document.querySelector(`#${prefix} input[name='genPassNum']`);
@@ -569,7 +569,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             $btnRegenPass.setAttribute("disabled", "disabled");
             $email.setAttribute("disabled", "disabled");
             $password.setAttribute("disabled", "disabled");
-            enablePassModBtn("modalAdd");
+            disablePasswordModifierCheckbox("modalAdd");
 
             SENDJson("POST", "/api/passwords", {
                 email: email,
@@ -580,7 +580,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
                 $btnRegenPass.removeAttribute("disabled");
                 $email.removeAttribute("disabled");
                 $password.removeAttribute("disabled");
-                disablePassModBtn("modalAdd");
+                enablePasswordModifierCheckbox("modalAdd");
                 if (data.success) {
                     const $tr = generateTableRow(data.data.id, email, innerPass);
                     $tableBody.appendChild($tr);
@@ -634,7 +634,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             $email.setAttribute("disabled", "disabled");
             $password.setAttribute("disabled", "disabled");
             $btnRegenPassEdit.setAttribute("disabled", "disabled");
-            enablePassModBtn("modalEdit");
+            disablePasswordModifierCheckbox("modalEdit");
 
             SENDJson("PUT", "/api/passwords", {
                 id: DashboardState.editing,
@@ -646,7 +646,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
                 $btnRegenPassEdit.removeAttribute("disabled");
                 $email.removeAttribute("disabled");
                 $password.removeAttribute("disabled");
-                disablePassModBtn("modalEdit");
+                enablePasswordModifierCheckbox("modalEdit");
                 DashboardState.editing = null;
                 if (data.success) {
                     const $tr = generateTableRow(data.data.id, email, innerPass);
