@@ -12,24 +12,66 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
     const numbers = "0123456789";
     const symbols = "!@#$%^&*_-+=";
 
-    let password = "";
-    let characters = "";
+    // Password ratio, from 0 to 1, total all of them will be 1
+    let lowerRatio = 0.4;
+    let upperRatio = 0.2;
+    let numberRatio = 0.2;
+    let symbolRatio = 0.2;
 
-    // append to our character list if enabled
-    if (lowerLetter) characters += lowerCase;
-    if (capitalLetter) characters += upperCase;
-    if (number) characters += numbers;
-    if (symbol) characters += symbols;
-
-    // check if our character list is empty, if yes just return nothing as fallback.
-    if (characters.length === 0) return "";
-
-    // lets generate random password according to our length
-    for (let i = 0; i < length; i++) {
-        password += characters.charAt(Math.floor(Math.random() * characters.length));
+    // Change ratio amount if any of them is disabled
+    if (!lowerLetter) {
+        lowerRatio = 0;
+    }
+    if (!capitalLetter) {
+        upperRatio = 0;
+    }
+    if (!number) {
+        numberRatio = 0;
+    }
+    if (!symbol) {
+        symbolRatio = 0;
     }
 
-    return password;
+    // Calculate total ratio
+    const totalRatio = lowerRatio + upperRatio + numberRatio + symbolRatio;
+    if (totalRatio === 0) {
+        return "";
+    }
+    // Calculate ratio for each type
+    lowerRatio /= totalRatio;
+    upperRatio /= totalRatio;
+    numberRatio /= totalRatio;
+    symbolRatio /= totalRatio;
+
+    let password = "";
+
+    const lowerLength = Math.floor(length * lowerRatio);
+    const upperLength = Math.floor(length * upperRatio);
+    const numberLength = Math.floor(length * numberRatio);
+    const symbolLength = Math.floor(length * symbolRatio);
+
+    const randomGet = (str, len) => {
+        if (len < 1) return "";
+        let result = "";
+        for (let i = 0; i < len; i++) {
+            result += str.charAt(Math.floor(Math.random() * str.length));
+        }
+        return result;
+    }
+
+    const shuffle = (str) => {
+        return str.split('').sort(function () {
+            return 0.5 - Math.random();
+        }).join('');
+    }
+
+    // Generate password
+    password += randomGet(lowerCase, lowerLength);
+    password += randomGet(upperCase, upperLength);
+    password += randomGet(numbers, numberLength);
+    password += randomGet(symbols, symbolLength);
+
+    return shuffle(password);
 } // <-- the reason it is not in the below safeguard is because I want to test it from the browser console itself.
 
 // safeguard, make sure the js content and function cannot be acessed by the browser
