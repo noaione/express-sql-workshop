@@ -18,7 +18,7 @@ export function isNone(value: any): value is Undefined {
  * @param error The error message we will sent
  * @param code The error code
  */
-export function wrapJSON(res: Response<any, Record<string, any>>, data?: any, error?: string, code?: number) {
+export function wrapJSON<T = any>(res: Response<any, Record<string, any>>, data?: T, error?: string, code?: number) {
     if (isNone(data)) {
         res.json({error: error || (code === 200 ? "Success" : "Unknown Error"), code: code || 500, success: code === 200});
     } else {

@@ -120,7 +120,7 @@ apiRouter.get("/passwords", async (req, res) => {
                 lastUpdated: passwd.lastUpdated.toISOString(),
             }
         })
-        wrapJSON(res, remappedPassword, undefined, 200);
+        wrapJSON<IPassword[]>(res, remappedPassword, undefined, 200);
     }
 })
 
@@ -138,12 +138,12 @@ apiRouter.post("/passwords", async (req, res) => {
                 userId,
             }
         })
-        wrapJSON(res, {
+        wrapJSON<IPassword>(res, {
             id: newPasswd.id,
             email: newPasswd.email,
             password: newPasswd.password,
             lastUpdated: newPasswd.lastUpdated.toISOString(),
-        } as IPassword, undefined, 200);
+        }, undefined, 200);
     }
 })
 
@@ -164,12 +164,12 @@ apiRouter.put("/passwords", async (req, res) => {
                 lastUpdated: new Date(),
             }
         })
-        wrapJSON(res, {
+        wrapJSON<IPassword>(res, {
             id: updatedPasswd.id,
             email: updatedPasswd.email,
             password: updatedPasswd.password,
             lastUpdated: updatedPasswd.lastUpdated.toISOString(),
-        } as IPassword, undefined, 200);
+        }, undefined, 200);
     }
 })
 
