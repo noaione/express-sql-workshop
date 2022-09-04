@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node ./dist/index.js",
     "dev": "ts-node --transpile-only ./src/index.ts",
-    "build": "tsc --declaration",
-    "build:css": "npx tailwindcss -i ./src/styles/tailwind.css -o ./public/static/css/styles.css",
+    "build": "cross-env NODE_ENV=production tsc --declaration",
+    "build:css": "cross-env NODE_ENV=production postcss ./src/styles/*.css -o ./public/static/css/styles.css",
     "watch": "ts-node-dev --respawn --transpile-only ./src/index.ts",
-    "watch:css": "npx tailwindcss -i ./src/styles/tailwind.css -o ./public/static/css/styles.css --watch"
+    "watch:css": "postcss ./src/styles/*.css -o ./public/static/css/styles.css --watch"
   },
   "dependencies": {
     "@prisma/client": "^4.2.1",
@@ -21,6 +21,11 @@
     "@types/express": "^4.17.13",
     "@types/express-session": "^1.17.5",
     "@types/node": "^18.7.13",
+    "autoprefixer": "^10.4.8",
+    "cross-env": "^7.0.3",
+    "cssnano": "^5.1.13",
+    "postcss": "^8.4.16",
+    "postcss-cli": "^10.0.0",
     "prisma": "^4.2.1",
     "tailwindcss": "^3.1.8",
     "ts-node": "^10.9.1",
