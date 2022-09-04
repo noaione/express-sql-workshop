@@ -128,7 +128,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
 
     /**
      * Send data to an API
-     * @param {"GET" | "POST" | "DELETE" | "PUT"} method HTTP Method
+     * @param {"GET" | "POST" | "DELETE" | "PATCH"} method HTTP Method
      * @param {string} url The URL to send data to
      * @param {any | null} data The data to be sent
      * @returns 
@@ -147,6 +147,27 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
     }
 
     /**
+     * Send POST data to the API
+     * @param {string} url The URL to send data to
+     * @param {any | null} data The data to be sent
+     */
+    const POSTJson = (url, data = null) => SENDJson("POST", url, data);
+
+    /**
+     * Send DELETE data to the API
+     * @param {string} url The URL to send data to
+     * @param {any | null} data The data to be sent
+     */
+    const DELETEJson = (url, data = null) => SENDJson("DELETE", url, data);
+
+    /**
+     * Send PATCH data to the API
+     * @param {string} url The URL to send data to
+     * @param {any | null} data The data to be sent
+     */
+    const PATCHJson = (url, data = null) => SENDJson("PATCH", url, data);
+
+    /**
      * Handle password deletion
      * @param {number} passwordId the password id
      */
@@ -156,7 +177,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
         $btnDelete.setAttribute("disabled", "disabled");
         console.info("[Delete]", passwordId);
         // Send deletion request to the backend server
-        SENDJson("DELETE", "/api/passwords", {id: passwordId}).then((resp) => resp.json()).then((data) => {
+        DELETEJson("/api/passwords", {id: passwordId}).then((resp) => resp.json()).then((data) => {
             $btnDelete.removeAttribute("disabled");
             DashboardState.deleted = null;
             if (data.success) {
@@ -562,7 +583,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             $password.setAttribute("disabled", "disabled");
             disablePasswordModifierCheckbox("modalAdd");
 
-            SENDJson("POST", "/api/passwords", {
+            POSTJson("/api/passwords", {
                 email: email,
                 password: innerPass
             }).then((resp) => resp.json()).then((data) => {
@@ -627,7 +648,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
             $btnRegenPassEdit.setAttribute("disabled", "disabled");
             disablePasswordModifierCheckbox("modalEdit");
 
-            SENDJson("PUT", "/api/passwords", {
+            PATCHJson("/api/passwords", {
                 id: DashboardState.editing,
                 email: email,
                 password: innerPass
@@ -652,7 +673,7 @@ function generatePassword(lowerLetter, capitalLetter, number, symbol, length = 8
 
         document.getElementById("logOutBtn").addEventListener("click", (ev) => {
             ev.preventDefault();
-            SENDJson("POST", "/api/logout").then((resp) => resp.json()).then((d) => {
+            POSTJson("/api/logout").then((resp) => resp.json()).then((d) => {
                 if (d.success) {
                     window.location.href = "/";
                 } else {

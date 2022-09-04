@@ -147,7 +147,7 @@ apiRouter.post("/passwords", async (req, res) => {
     }
 })
 
-apiRouter.put("/passwords", async (req, res) => {
+apiRouter.patch("/passwords", async (req, res) => {
     // @ts-ignore
     const {userId} = req.session!;
     if (!userId) {
