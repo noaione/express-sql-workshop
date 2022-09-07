@@ -4,7 +4,13 @@ import session from "express-session";
 import path from "path";
 import { IPassword } from "./types";
 
-import { wrapJSON } from "./utils";
+import { isNone, wrapJSON } from "./utils";
+
+declare module 'express-session' {
+    interface SessionData {
+        userId: number;
+    }
+}
 
 /**
  * Initialize our database and express server
@@ -51,8 +57,7 @@ apiRouter.post("/login", async (req, res) => {
     if (user) {
         // Check password
         if (user.password === password) {
-            // @ts-ignore
-            req.session!.userId = user.id;
+            req.session.userId = user.id;
             req.session.save()
             wrapJSON(res, undefined, "Success", 200);
         } else {
@@ -80,8 +85,7 @@ apiRouter.post("/signup", async (req, res) => {
                 password,
             },
         });
-        // @ts-ignore
-        req.session!.userId = newUser.id;
+        req.session.userId = newUser.id;
         req.session.save()
         wrapJSON(res, undefined, "Success", 200);
     }
@@ -100,8 +104,7 @@ apiRouter.post("/logout", (req, res) => {
 });
 
 apiRouter.get("/passwords", async (req, res) => {
-    // @ts-ignore
-    const {userId} = req.session!;
+    const {userId} = req.session;
     if (!userId) {
         wrapJSON(res.status(403), undefined, "Unathorized", 403);
     } else {
@@ -125,8 +128,7 @@ apiRouter.get("/passwords", async (req, res) => {
 })
 
 apiRouter.post("/passwords", async (req, res) => {
-    // @ts-ignore
-    const {userId} = req.session!;
+    const {userId} = req.session;
     if (!userId) {
         wrapJSON(res.status(403), undefined, "Unathorized", 403);
     } else {
@@ -148,8 +150,7 @@ apiRouter.post("/passwords", async (req, res) => {
 })
 
 apiRouter.patch("/passwords", async (req, res) => {
-    // @ts-ignore
-    const {userId} = req.session!;
+    const {userId} = req.session;
     if (!userId) {
         wrapJSON(res.status(403), undefined, "Unathorized", 403);
     } else {
@@ -174,8 +175,7 @@ apiRouter.patch("/passwords", async (req, res) => {
 })
 
 apiRouter.delete("/passwords", async (req, res) => {
-    // @ts-ignore
-    const {userId} = req.session!;
+    const {userId} = req.session;
     if (!userId) {
         wrapJSON(res.status(403), undefined, "Unathorized", 403);
     } else {
@@ -203,8 +203,7 @@ app.get("/register", (req, res) => {
 // Add our dashboard route
 app.get("/dashboard", (req, res) => {
     // Check if the user is logged in
-    // @ts-ignore
-    if (req.session && req.session.userId) {
+    if (req.session && !isNone(req.session.userId)) {
         res.sendFile(path.join(publicPath, "dashboard.html"));
     } else {
         res.redirect("/");
