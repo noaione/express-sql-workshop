@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import express from "express";
 import session from "express-session";
 import path from "path";
@@ -155,15 +156,20 @@ apiRouter.patch("/passwords", async (req, res) => {
         wrapJSON(res.status(403), undefined, "Unathorized", 403);
     } else {
         const {email, password, id} = req.body;
+        const updateData: Prisma.PasswordBankUpdateInput = {
+            lastUpdated: new Date(),
+        }
+        if (!isNone(email)) {
+            updateData.email = email;
+        }
+        if (!isNone(password)) {
+            updateData.password = password;
+        }
         const updatedPasswd = await prisma.passwordBank.update({
             where: {
                 id,
             },
-            data: {
-                email,
-                password,
-                lastUpdated: new Date(),
-            }
+            data: updateData
         })
         wrapJSON<IPassword>(res, {
             id: updatedPasswd.id,
@@ -211,7 +217,7 @@ app.get("/dashboard", (req, res) => {
 })
 
 // start server and before that connect to database
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4545;
 
 /**
  * Connect to our database, after it got established
